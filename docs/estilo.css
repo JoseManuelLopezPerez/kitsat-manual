@@ -163,6 +163,7 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   z-index: 15;
 }
 .pestana {
+  --abre: cubic-bezier(.22, 1, .36, 1);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -179,12 +180,29 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
   overflow: hidden;
   white-space: nowrap;
   box-shadow: -3px 3px 10px rgba(22, 40, 92, .18);
-  transition: width .25s cubic-bezier(.3, .7, .2, 1), filter .2s;
+  /* al cerrar: primero se va el texto y luego, con calma, la pestaña */
+  transition: width .55s var(--abre) .12s, box-shadow .5s ease, transform .5s var(--abre);
 }
-.pestana span { opacity: 0; transition: opacity .2s; font-weight: 600; }
+.pestana span {
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity .25s ease, transform .4s var(--abre);
+  font-weight: 600;
+}
 .pestana b { min-width: 20px; text-align: center; }
-.pestana:hover, .pestana:focus-visible { width: 200px; }
-.pestana:hover span, .pestana:focus-visible span { opacity: 1; }
+/* al abrir: una breve espera evita que se abra al pasar de largo con el mouse,
+   luego la pestaña se desliza despacio y el texto aparece al final */
+.pestana:hover, .pestana:focus-visible {
+  width: 200px;
+  transform: translateX(-2px);
+  box-shadow: -6px 6px 18px rgba(22, 40, 92, .22);
+  transition: width .8s var(--abre) .18s, box-shadow .6s ease .18s, transform .8s var(--abre) .18s;
+}
+.pestana:hover span, .pestana:focus-visible span {
+  opacity: 1;
+  transform: none;
+  transition: opacity .6s ease .45s, transform .8s var(--abre) .4s;
+}
 .pestana.activa { width: 56px; box-shadow: -3px 3px 14px rgba(22, 40, 92, .3), inset 3px 0 0 rgba(255, 255, 255, .7); }
 .pestana.activa:hover { width: 200px; }
 
@@ -221,6 +239,10 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 }
 .icono:hover { background: #f1f3f8; color: var(--tinta); }
 .icono[aria-pressed="true"] { color: var(--acento); }
+#btnModo .una, #btnModo[aria-pressed="false"] .dos { display: none; }
+#btnModo[aria-pressed="false"] .una { display: inline; }
+#btnModo[aria-pressed="true"] { color: var(--tenue); }
+#btnModo[aria-pressed="true"]:hover { color: var(--tinta); }
 #btnSonido .onda { display: none; }
 #btnSonido[aria-pressed="true"] .onda { display: inline; }
 #btnSonido[aria-pressed="true"] .mute { display: none; }
@@ -323,6 +345,31 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   z-index: 1;
 }
 
+/* ---------- Sugerencia para girar el teléfono ---------- */
+
+.girar {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  margin: 0 auto;
+  width: max-content;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f3f5fa;
+  color: var(--tenue);
+  font-size: 13px;
+  transition: opacity .8s ease, transform .8s cubic-bezier(.22, 1, .36, 1);
+}
+.girar svg { width: 18px; height: 18px; }
+.girar.oculto { opacity: 0; transform: translateY(8px); pointer-events: none; }
+@media (max-width: 700px) and (orientation: portrait) {
+  .girar { display: flex; }
+}
+
 /* ---------- Carga ---------- */
 
 .cargando {
@@ -348,9 +395,13 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
 
 @media (max-width: 700px) {
   :root { --barra-alto: 58px; }
-  .flecha { width: 40px; height: 40px; background: rgba(255, 255, 255, .85); }
-  .flecha.ant { left: 4px; }
-  .flecha.sig { right: 4px; }
+  /* en teléfono las hojas se pasan tocando o deslizando el libro */
+  .flecha { display: none; }
+  #btnSonido { display: none; }
+  .barra { gap: 0; }
+  .icono { width: 38px; }
+  .contador { flex: none; min-width: 0; font-size: 12px; }
+  input[type="range"] { min-width: 40px; }
   .pestanas { display: none; }
   #btnInicio, #btnPantalla { display: none; }
   .avance { gap: 8px; padding: 0 4px; }

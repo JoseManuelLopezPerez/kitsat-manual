@@ -25,6 +25,8 @@
   let giro = null;           // hoja que está girando
   let pendiente = 0;         // un giro en cola (+1 / -1)
   let sonido = localStorage.getItem("flip-sonido") === "1";
+  // dos páginas a la vez es lo predeterminado, también en teléfono
+  let modo = localStorage.getItem("flip-modo") === "sencillo" ? "sencillo" : "doble";
 
   /* ---------- Qué páginas se ven ---------- */
 
@@ -101,12 +103,12 @@
   function medir() {
     const r = escenario.getBoundingClientRect();
     const chico = innerWidth <= 700;
-    const margenX = chico ? 12 : 240; // espacio para flechas y pestañas
-    const margenY = chico ? 16 : 40;
+    const margenX = chico ? 10 : 240; // espacio para flechas y pestañas
+    const margenY = chico ? 20 : 40;
     const W = r.width - margenX;
     const H = r.height - margenY;
     const antes = doble;
-    doble = r.width >= 760 && r.width / r.height >= 1.05;
+    doble = modo === "doble";
     ancho = Math.floor(Math.min(H * proporcion, doble ? W / 2 : W));
     const alto = Math.round(ancho / proporcion);
     libro.style.setProperty("--ancho", `${ancho}px`);
@@ -342,7 +344,10 @@
           raiz.remove(); // otro giro sigue activo
           return;
         }
-        if (completo) pagina = nueva;
+        if (completo) {
+          pagina = nueva;
+          $("girar").classList.add("oculto");
+        }
         // primero quedan listas las hojas quietas; después se quita la que giró
         mostrar().then(() => setTimeout(() => raiz.remove(), 0));
         giro = null;
@@ -647,6 +652,14 @@
     } catch { /* sin audio */ }
   }
 
+  function pintarModo() {
+    const b = $("btnModo");
+    const dos = modo === "doble";
+    b.setAttribute("aria-pressed", dos);
+    b.setAttribute("aria-label", dos ? "Ver una página" : "Ver dos páginas");
+    b.title = dos ? "Ver una página" : "Ver dos páginas";
+  }
+
   function pintarSonido() {
     const b = $("btnSonido");
     b.setAttribute("aria-pressed", sonido);
@@ -660,6 +673,15 @@
   $("btnInicio").addEventListener("click", () => irA(1));
   $("btnMinis").addEventListener("click", () => alternarMinis());
   $("btnZoom").addEventListener("click", abrirZoom);
+  $("btnModo").addEventListener("click", () => {
+    if (giro) return;
+    if (asomo) { asomo.terminar(false); asomo = null; }
+    modo = modo === "doble" ? "sencillo" : "doble";
+    localStorage.setItem("flip-modo", modo);
+    pintarModo();
+    medir();
+    libro.animate([{ opacity: 0.6, scale: 0.98 }, { opacity: 1, scale: 1 }], { duration: 380, easing: "cubic-bezier(.22,1,.36,1)" });
+  });
   $("btnCerrarZoom").addEventListener("click", cerrarZoom);
   $("btnSonido").addEventListener("click", () => {
     sonido = !sonido;
@@ -722,6 +744,7 @@
     pagina = limitar(+(location.hash.match(/p=(\d+)/) || [])[1] || 1, 1, total);
     crearPestanas();
     pintarSonido();
+    pintarModo();
     medir();
     mostrar();
     const v = vista();
