@@ -484,6 +484,9 @@
   }
 
   escenario.addEventListener("pointerdown", (e) => {
+    // con el dedo, la hoja solo se pasa con los botones: así el dedo queda libre
+    // para acercar y mover el libro con zoom normal
+    if (e.pointerType === "touch") return;
     if (e.button !== 0 || e.target.closest("button, a, nav")) return;
     const r = libro.getBoundingClientRect();
     if (e.clientX < r.left - 30 || e.clientX > r.right + 30 || e.clientY < r.top || e.clientY > r.bottom) return;
@@ -766,7 +769,9 @@
   let espera;
   addEventListener("resize", () => {
     clearTimeout(espera);
-    espera = setTimeout(() => { if (!giro && !asomo) medir(); }, 120);
+    // con zoom de dos dedos no se reacomoda el libro, para no deshacer el acercamiento
+    const conZoom = window.visualViewport && visualViewport.scale > 1.01;
+    espera = setTimeout(() => { if (!giro && !asomo && !conZoom) medir(); }, 120);
   });
   addEventListener("hashchange", () => {
     const n = +(location.hash.match(/p=(\d+)/) || [])[1];

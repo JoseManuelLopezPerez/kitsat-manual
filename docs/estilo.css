@@ -452,6 +452,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
 }
 
 @media (max-width: 700px), (max-height: 500px), (pointer: coarse) {
+  /* el dedo acerca y mueve el libro como cualquier página (zoom con dos dedos) */
+  .escenario { touch-action: auto; }
   .icono.paso {
     display: grid;
     width: 44px;
