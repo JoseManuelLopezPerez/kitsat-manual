@@ -1,0 +1,15 @@
+{
+  "titulo": "KIT-SAT · Manual de armado",
+  "secciones": [
+    { "numero": "1",  "nombre": "Base",                 "color": "#5c6b80", "pagina": 7 },
+    { "numero": "2",  "nombre": "Estructura",           "color": "#ee7a1e", "pagina": 8 },
+    { "numero": "3",  "nombre": "Energía",              "color": "#e0393e", "pagina": 10 },
+    { "numero": "4",  "nombre": "Computadora de vuelo", "color": "#7b4fd6", "pagina": 12 },
+    { "numero": "5",  "nombre": "Sensores",             "color": "#25a04a", "pagina": 14 },
+    { "numero": "6",  "nombre": "Radio",                "color": "#1f7fe0", "pagina": 16 },
+    { "numero": "7",  "nombre": "Paracaídas",           "color": "#d93a92", "pagina": 18 },
+    { "numero": "8",  "nombre": "Carcasa y antena",     "color": "#169c8e", "pagina": 20 },
+    { "numero": "9",  "nombre": "Misión",               "color": "#22387a", "pagina": 21 },
+    { "numero": "10", "nombre": "Programa",             "color": "#c98f0a", "pagina": 22 }
+  ]
+}

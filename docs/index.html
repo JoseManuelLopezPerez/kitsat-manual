@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KIT-SAT · Manual de armado</title>
+  <meta name="description" content="Manual de armado del KIT-SAT, en formato de libro interactivo.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="preload" href="paginas/01.webp" as="image" type="image/webp">
+  <link rel="icon" href="miniaturas/01.webp" type="image/webp">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <main class="escenario" id="escenario">
+    <div class="libro" id="libro" aria-live="polite">
+      <div class="hoja izq" id="hojaIzq"></div>
+      <div class="hoja der" id="hojaDer"></div>
+    </div>
+    <button class="flecha ant" id="btnAnt" aria-label="Página anterior">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <button class="flecha sig" id="btnSig" aria-label="Página siguiente">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <nav class="pestanas" id="pestanas" aria-label="Secciones"></nav>
+    <div class="cargando" id="cargando"><span></span></div>
+  </main>
+
+  <footer class="barra" id="barra">
+    <button class="icono" id="btnInicio" aria-label="Ir a la portada" title="Portada">
+      <svg viewBox="0 0 24 24"><path d="M6 5v14M18 5l-8 7 8 7"/></svg>
+    </button>
+    <div class="avance">
+      <input type="range" id="deslizador" min="1" value="1" aria-label="Ir a la página">
+      <span class="contador" id="contador">1 / 1</span>
+    </div>
+    <button class="icono" id="btnMinis" aria-label="Ver miniaturas" title="Miniaturas">
+      <svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+    </button>
+    <button class="icono" id="btnZoom" aria-label="Ampliar" title="Ampliar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/></svg>
+    </button>
+    <button class="icono" id="btnSonido" aria-label="Activar sonido" title="Sonido" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10z"/><path class="onda" d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/><path class="mute" d="M16 9l5 6M21 9l-5 6"/></svg>
+    </button>
+    <a class="icono" id="btnPdf" href="manual.pdf" download aria-label="Descargar PDF" title="Descargar PDF">
+      <svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+    </a>
+    <button class="icono" id="btnPantalla" aria-label="Pantalla completa" title="Pantalla completa">
+      <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+    </button>
+  </footer>
+
+  <section class="minis" id="minis" aria-label="Miniaturas" hidden>
+    <div class="minis-rejilla" id="minisRejilla"></div>
+  </section>
+
+  <section class="zoom" id="zoom" aria-label="Página ampliada" hidden>
+    <button class="icono cerrar" id="btnCerrarZoom" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="zoom-contenido" id="zoomContenido"></div>
+  </section>
+
+  <script src="flipbook.js" defer></script>
+</body>
+</html>
