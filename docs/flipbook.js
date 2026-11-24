@@ -741,10 +741,53 @@
     pintarSonido();
     sonar(0.6);
   });
-  $("btnPantalla").addEventListener("click", () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen?.();
+  /* ---------- Pantalla completa ---------- */
+  // El navegador solo deja entrar a pantalla completa después de un toque o clic,
+  // así que al girar el teléfono se muestra un aviso: el primer toque la activa.
+  const raizDoc = document.documentElement;
+  const pedirCompleta = raizDoc.requestFullscreen || raizDoc.webkitRequestFullscreen;
+  const salirCompleta = document.exitFullscreen || document.webkitExitFullscreen;
+  const enCompleta = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  const hayCompleta = !!pedirCompleta && (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  // abierto desde el ícono de la pantalla de inicio ya no tiene barra del navegador
+  const comoApp = matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches;
+  const tactil = matchMedia("(pointer: coarse)");
+  const deLado = matchMedia("(orientation: landscape)");
+  const avisoCompleta = $("avisoCompleta");
+  if (!hayCompleta || comoApp) document.body.classList.add("sin-completa");
+
+  function alternarCompleta() {
+    try {
+      if (enCompleta()) salirCompleta.call(document);
+      else Promise.resolve(pedirCompleta.call(raizDoc, { navigationUI: "hide" })).catch(() => {});
+    } catch {}
+  }
+  function pintarCompleta() {
+    const b = $("btnPantalla");
+    const dentro = enCompleta();
+    b.setAttribute("aria-pressed", dentro);
+    const texto = dentro ? "Salir de pantalla completa" : "Pantalla completa";
+    b.setAttribute("aria-label", texto);
+    b.title = texto;
+    b.querySelector(".etiqueta").textContent = dentro ? "Salir" : "Pantalla completa";
+    if (dentro) avisoCompleta.hidden = true;
+  }
+  function revisarGiro() {
+    const toca = hayCompleta && !comoApp && tactil.matches && deLado.matches && !enCompleta()
+      && sessionStorage.getItem("aviso-completa") !== "no";
+    avisoCompleta.hidden = !toca;
+  }
+  $("btnPantalla").addEventListener("click", alternarCompleta);
+  avisoCompleta.addEventListener("click", (e) => {
+    avisoCompleta.hidden = true;
+    if (e.target.closest("#completaNo")) sessionStorage.setItem("aviso-completa", "no");
+    else alternarCompleta();
   });
+  document.addEventListener("fullscreenchange", pintarCompleta);
+  document.addEventListener("webkitfullscreenchange", pintarCompleta);
+  // al girar a horizontal aparece el aviso; al volver a vertical se quita
+  deLado.addEventListener?.("change", revisarGiro);
+  revisarGiro();
   deslizador.addEventListener("input", () => {
     contador.textContent = `${deslizador.value} / ${total}`;
   });

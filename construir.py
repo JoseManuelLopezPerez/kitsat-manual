@@ -66,6 +66,18 @@ def main() -> None:
                 im.save(miniaturas / f"{i:02d}.webp", "WEBP", quality=CALIDAD_MINI, method=4)
             print(f"  página {i}/{len(archivos)}")
 
+    # íconos para "Agregar a pantalla de inicio", hechos con la portada
+    iconos = WEB / "iconos"
+    iconos.mkdir(exist_ok=True)
+    with Image.open(paginas / "01.webp") as portada:
+        portada = portada.convert("RGB")
+        for n in (180, 192, 512):
+            lienzo = Image.new("RGB", (n, n), "white")
+            chica = portada.copy()
+            chica.thumbnail((int(n * 0.78), int(n * 0.88)), Image.LANCZOS)
+            lienzo.paste(chica, ((n - chica.width) // 2, (n - chica.height) // 2))
+            lienzo.save(iconos / f"{n}.png", optimize=True)
+
     shutil.copyfile(pdf, WEB / "manual.pdf")
     (WEB / "paginas.json").write_text(
         json.dumps({"total": len(archivos), "ancho": tam[0], "alto": tam[1], "version": time.strftime("%Y%m%d%H%M%S")}, indent=2),
