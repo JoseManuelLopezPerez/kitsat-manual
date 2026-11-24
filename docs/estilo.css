@@ -240,6 +240,9 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 }
 .icono:hover { background: #f1f3f8; color: var(--tinta); }
 .icono[aria-pressed="true"] { color: var(--acento); }
+/* anterior/siguiente en la barra: solo en teléfono, donde no hay flechas a los lados */
+.icono.paso { display: none; }
+.icono.paso:disabled { opacity: .3; cursor: default; background: transparent; }
 #btnModo .una, #btnModo[aria-pressed="false"] .dos { display: none; }
 #btnModo[aria-pressed="false"] .una { display: inline; }
 #btnModo[aria-pressed="true"] { color: var(--tenue); }
@@ -434,6 +437,19 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   :root { --barra-alto: 58px; }
   /* en teléfono las hojas se pasan tocando o deslizando el libro */
   .flecha { display: none; }
+  .icono.paso {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--acento);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(31, 60, 143, .3);
+    transition: transform .2s, opacity .2s;
+  }
+  .icono.paso:hover { background: var(--acento); color: #fff; }
+  .icono.paso:active { transform: scale(.92); }
+  .icono.paso:disabled { background: #c9d0e0; box-shadow: none; opacity: 1; }
   #btnSonido { display: none; }
   .barra { gap: 0; }
   .icono { width: 38px; }

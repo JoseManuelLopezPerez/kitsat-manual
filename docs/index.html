@@ -7,7 +7,7 @@
   <meta name="description" content="Manual de armado del KIT-SAT, en formato de libro interactivo.">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="miniaturas/01.webp" type="image/webp">
-  <link rel="stylesheet" href="estilo.css?v=20261124d">
+  <link rel="stylesheet" href="estilo.css?v=20261124e">
 </head>
 <body>
   <main class="escenario" id="escenario">
@@ -29,10 +29,16 @@
     <button class="icono" id="btnInicio" aria-label="Ir a la portada" title="Portada">
       <svg viewBox="0 0 24 24"><path d="M6 5v14M18 5l-8 7 8 7"/></svg>
     </button>
+    <button class="icono paso" id="btnAntBarra" aria-label="Página anterior" title="Página anterior">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
     <div class="avance">
       <input type="range" id="deslizador" min="1" value="1" aria-label="Ir a la página">
       <span class="contador" id="contador">1 / 1</span>
     </div>
+    <button class="icono paso" id="btnSigBarra" aria-label="Página siguiente" title="Página siguiente">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
     <button class="icono" id="btnMinis" aria-label="Ver miniaturas" title="Miniaturas">
       <svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
     </button>
@@ -75,6 +81,6 @@
     </div>
   </div>
 
-  <script src="flipbook.js?v=20261124d" defer></script>
+  <script src="flipbook.js?v=20261124e" defer></script>
 </body>
 </html>

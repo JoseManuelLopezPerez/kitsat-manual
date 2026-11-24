@@ -589,8 +589,8 @@
     contador.textContent = visiblesTexto();
     deslizador.value = ref;
     deslizador.style.setProperty("--avance", `${((ref - 1) / Math.max(1, total - 1)) * 100}%`);
-    $("btnAnt").disabled = !destino(-1);
-    $("btnSig").disabled = !destino(1);
+    $("btnAnt").disabled = $("btnAntBarra").disabled = !destino(-1);
+    $("btnSig").disabled = $("btnSigBarra").disabled = !destino(1);
     history.replaceState(null, "", `#p=${pagina}`);
 
     let activa = -1;
@@ -711,6 +711,8 @@
 
   $("btnAnt").addEventListener("click", () => voltear(-1));
   $("btnSig").addEventListener("click", () => voltear(1));
+  $("btnAntBarra").addEventListener("click", () => voltear(-1));
+  $("btnSigBarra").addEventListener("click", () => voltear(1));
   $("btnInicio").addEventListener("click", () => irA(1));
   $("btnMinis").addEventListener("click", () => alternarMinis());
   $("btnZoom").addEventListener("click", abrirZoom);
