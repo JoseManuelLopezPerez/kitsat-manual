@@ -80,8 +80,20 @@
     return div;
   }
 
+  // cambia la página de una hoja sin parpadeo: la imagen nueva se decodifica
+  // antes de sustituir a la anterior, y si es la misma página no se toca
   function pintar(hoja, n, lado) {
-    hoja.replaceChildren(cara(n, lado));
+    const clave = `${n}|${lado}`;
+    if (hoja.dataset.clave === clave) return Promise.resolve();
+    hoja.dataset.clave = clave;
+    const nueva = cara(n, lado);
+    const im = nueva.querySelector("img");
+    const poner = () => { if (hoja.dataset.clave === clave) hoja.replaceChildren(nueva); };
+    if (!im) {
+      poner();
+      return Promise.resolve();
+    }
+    return Promise.race([im.decode().catch(() => {}), new Promise((r) => setTimeout(r, 500))]).then(poner);
   }
 
   /* ---------- Medidas ---------- */
@@ -117,11 +129,11 @@
 
   function mostrar() {
     const v = vista();
-    pintar(hojaIzq, v.izq, "izq");
-    pintar(hojaDer, v.der, "der");
+    const listo = Promise.all([pintar(hojaIzq, v.izq, "izq"), pintar(hojaDer, v.der, "der")]);
     centrar(v);
     actualizarUI();
     vecinas();
+    return listo;
   }
 
   function irA(n, animado = true) {
@@ -137,7 +149,6 @@
       return;
     }
     pagina = n;
-    libro.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 260, easing: "ease-out" });
     mostrar();
     sonar(0.6);
   }
@@ -241,14 +252,15 @@
     bajo.appendChild(bajoLuz);
 
     const frente = capa("doblez-frente");
-    const frenteImg = imagen(nFrente, "doblez-img");
+    // las caras que giran llevan la misma sombra de lomo que las hojas quietas
+    const frenteImg = imagen(nFrente, `doblez-img lado-${doble && s < 0 ? "izq" : "der"}`);
     frenteImg.style.left = `${doble ? (s > 0 ? W : 0) : 0}px`;
     const frenteLuz = capa("degradado");
     frente.append(frenteImg, frenteLuz);
 
     const sombra = capa("doblez-sombra");
     const dorso = capa("doblez-dorso");
-    const dorsoImg = imagen(nDorso, "doblez-img");
+    const dorsoImg = imagen(nDorso, `doblez-img lado-${s > 0 ? "izq" : "der"}`);
     const dorsoLuz = capa("degradado");
     dorso.append(dorsoImg, dorsoLuz);
     sombra.appendChild(dorso);
@@ -265,9 +277,9 @@
     const rect = [[0, 0], [W, 0], [W, H], [0, H]];
     const G = Math.ceil(Math.hypot(W, H) * 2);
 
-    function orientar(el, Mb, d, fondo) {
+    function orientar(el, Mb, d, fondo, opacidad) {
       const ang = (Math.atan2(d[1], d[0]) * 180) / Math.PI;
-      el.style.cssText = `left:${Mb[0]}px;top:${Mb[1] - G}px;width:${G}px;height:${2 * G}px;transform:rotate(${ang}deg);background:${fondo}`;
+      el.style.cssText = `left:${Mb[0]}px;top:${Mb[1] - G}px;width:${G}px;height:${2 * G}px;transform:rotate(${ang}deg);background:${fondo};opacity:${opacidad.toFixed(3)}`;
     }
 
     const g = {
@@ -311,21 +323,28 @@
         const nb = [s * n[0], n[1]];
         const d = l / 2;
         const anchoSombra = Math.min(d, W * 0.45) * 0.9 + 8;
+        // al acercarse a su destino la hoja queda plana: las luces se apagan poco a poco
+        // para que coincida exactamente con la hoja quieta que la sustituye
+        const k = limitar(largo(resta(P, P1)) / (W * 0.4), 0, 1);
+        const kSuave = k * k * (3 - 2 * k);
         orientar(bajoLuz, Mb, nb,
-          `linear-gradient(to right, rgba(0,0,0,.42) 0, rgba(0,0,0,.18) ${anchoSombra * 0.35}px, transparent ${anchoSombra}px)`);
+          `linear-gradient(to right, rgba(0,0,0,.42) 0, rgba(0,0,0,.18) ${anchoSombra * 0.35}px, transparent ${anchoSombra}px)`, kSuave);
         orientar(dorsoLuz, Mb, [-nb[0], -nb[1]],
-          `linear-gradient(to right, rgba(0,0,0,.30) 0, rgba(0,0,0,.06) ${Math.max(4, d * 0.08)}px, rgba(255,255,255,.35) ${Math.max(10, d * 0.22)}px, rgba(255,255,255,0) ${Math.max(20, d * 0.55)}px, rgba(0,0,0,.08) ${Math.max(40, d * 1.6)}px)`);
+          `linear-gradient(to right, rgba(0,0,0,.30) 0, rgba(0,0,0,.06) ${Math.max(4, d * 0.08)}px, rgba(255,255,255,.35) ${Math.max(10, d * 0.22)}px, rgba(255,255,255,0) ${Math.max(20, d * 0.55)}px, rgba(0,0,0,.08) ${Math.max(40, d * 1.6)}px)`, kSuave);
         orientar(frenteLuz, Mb, [-nb[0], -nb[1]],
-          `linear-gradient(to right, rgba(0,0,0,.18) 0, transparent ${Math.max(6, d * 0.12)}px)`);
-        sombra.style.filter = `drop-shadow(${(-nb[0] * 6).toFixed(1)}px ${(-nb[1] * 6 + 4).toFixed(1)}px ${Math.min(18, 4 + d * 0.06).toFixed(1)}px rgba(0,0,0,.28))`;
+          `linear-gradient(to right, rgba(0,0,0,.18) 0, transparent ${Math.max(6, d * 0.12)}px)`, kSuave);
+        sombra.style.filter = `drop-shadow(${(-nb[0] * 6).toFixed(1)}px ${(-nb[1] * 6 + 4).toFixed(1)}px ${Math.min(18, 4 + d * 0.06).toFixed(1)}px rgba(0,0,0,${(0.28 * kSuave).toFixed(3)}))`;
 
         if (!doble) sombra.style.opacity = (1 - Math.max(0, (g.avance() - 0.55) / 0.45)).toFixed(3);
       },
       terminar(completo) {
-        raiz.remove();
-        if (giro && giro !== g) return; // otro giro sigue activo
+        if (giro && giro !== g) {
+          raiz.remove(); // otro giro sigue activo
+          return;
+        }
         if (completo) pagina = nueva;
-        mostrar();
+        // primero quedan listas las hojas quietas; después se quita la que giró
+        mostrar().then(() => setTimeout(() => raiz.remove(), 0));
         giro = null;
         if (pendiente) {
           const d = Math.sign(pendiente);
