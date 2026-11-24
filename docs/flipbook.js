@@ -11,8 +11,9 @@
   const deslizador = $("deslizador");
   const contador = $("contador");
 
-  const ruta = (n) => `paginas/${String(n).padStart(2, "0")}.webp`;
-  const rutaMini = (n) => `miniaturas/${String(n).padStart(2, "0")}.webp`;
+  let version = "";
+  const ruta = (n) => `paginas/${String(n).padStart(2, "0")}.webp${version}`;
+  const rutaMini = (n) => `miniaturas/${String(n).padStart(2, "0")}.webp${version}`;
   const limitar = (v, a, b) => Math.min(b, Math.max(a, v));
   const suave = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -102,9 +103,9 @@
 
   function medir() {
     const r = escenario.getBoundingClientRect();
-    const chico = innerWidth <= 700;
+    const chico = innerWidth <= 700 || innerHeight <= 500; // teléfono, vertical u horizontal
     const margenX = chico ? 10 : 240; // espacio para flechas y pestañas
-    const margenY = chico ? 20 : 40;
+    const margenY = chico ? (innerHeight <= 500 ? 10 : 20) : 40;
     const W = r.width - margenX;
     const H = r.height - margenY;
     const antes = doble;
@@ -344,10 +345,7 @@
           raiz.remove(); // otro giro sigue activo
           return;
         }
-        if (completo) {
-          pagina = nueva;
-          $("girar").classList.add("oculto");
-        }
+        if (completo) pagina = nueva;
         // primero quedan listas las hojas quietas; después se quita la que giró
         mostrar().then(() => setTimeout(() => raiz.remove(), 0));
         giro = null;
@@ -683,6 +681,12 @@
     libro.animate([{ opacity: 0.6, scale: 0.98 }, { opacity: 1, scale: 1 }], { duration: 380, easing: "cubic-bezier(.22,1,.36,1)" });
   });
   $("btnCerrarZoom").addEventListener("click", cerrarZoom);
+  // aviso para girar el teléfono: se puede cerrar y no vuelve en esta visita
+  if (sessionStorage.getItem("aviso-girar") === "visto") $("avisoGirar").classList.add("cerrado");
+  $("avisoCerrar").addEventListener("click", () => {
+    $("avisoGirar").classList.add("cerrado");
+    sessionStorage.setItem("aviso-girar", "visto");
+  });
   $("btnSonido").addEventListener("click", () => {
     sonido = !sonido;
     localStorage.setItem("flip-sonido", sonido ? "1" : "0");
@@ -729,10 +733,11 @@
   async function iniciar() {
     try {
       const [info, conf] = await Promise.all([
-        fetch("paginas.json").then((r) => r.json()),
-        fetch("config.json").then((r) => r.json()).catch(() => ({})),
+        fetch("paginas.json", { cache: "no-cache" }).then((r) => r.json()),
+        fetch("config.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => ({})),
       ]);
       total = info.total;
+      if (info.version) version = `?v=${info.version}`; // al cambiar el PDF, el teléfono no usa imágenes viejas
       proporcion = info.ancho / info.alto;
       secciones = conf.secciones || [];
       if (conf.titulo) document.title = conf.titulo;

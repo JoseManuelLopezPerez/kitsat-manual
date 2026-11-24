@@ -19,6 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from PIL import Image
@@ -67,7 +68,7 @@ def main() -> None:
 
     shutil.copyfile(pdf, WEB / "manual.pdf")
     (WEB / "paginas.json").write_text(
-        json.dumps({"total": len(archivos), "ancho": tam[0], "alto": tam[1]}, indent=2),
+        json.dumps({"total": len(archivos), "ancho": tam[0], "alto": tam[1], "version": time.strftime("%Y%m%d%H%M%S")}, indent=2),
         encoding="utf-8",
     )
     peso = sum(f.stat().st_size for f in paginas.glob("*.webp")) / 1e6

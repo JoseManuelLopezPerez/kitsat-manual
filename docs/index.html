@@ -6,9 +6,8 @@
   <title>KIT-SAT · Manual de armado</title>
   <meta name="description" content="Manual de armado del KIT-SAT, en formato de libro interactivo.">
   <meta name="theme-color" content="#ffffff">
-  <link rel="preload" href="paginas/01.webp" as="image" type="image/webp">
   <link rel="icon" href="miniaturas/01.webp" type="image/webp">
-  <link rel="stylesheet" href="estilo.css">
+  <link rel="stylesheet" href="estilo.css?v=20261124b">
 </head>
 <body>
   <main class="escenario" id="escenario">
@@ -23,10 +22,6 @@
       <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
     </button>
     <nav class="pestanas" id="pestanas" aria-label="Secciones"></nav>
-    <div class="girar" id="girar" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M3 14a9 9 0 0 0 6 6M21 10a9 9 0 0 0-6-6"/></svg>
-      Gira tu teléfono para verlo más grande
-    </div>
     <div class="cargando" id="cargando"><span></span></div>
   </main>
 
@@ -69,6 +64,17 @@
     <div class="zoom-contenido" id="zoomContenido"></div>
   </section>
 
-  <script src="flipbook.js" defer></script>
+  <div class="aviso-girar" id="avisoGirar" role="dialog" aria-modal="true" aria-labelledby="avisoTitulo">
+    <div class="aviso-tarjeta">
+      <div class="aviso-telefono" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><rect x="20" y="8" width="24" height="48" rx="5"/><path d="M29 50h6"/></svg>
+      </div>
+      <h2 id="avisoTitulo">Gira tu teléfono</h2>
+      <p>El manual se ve mejor de lado, abierto a dos páginas como un libro de verdad.</p>
+      <button class="aviso-boton" id="avisoCerrar">Ver así de todos modos</button>
+    </div>
+  </div>
+
+  <script src="flipbook.js?v=20261124b" defer></script>
 </body>
 </html>

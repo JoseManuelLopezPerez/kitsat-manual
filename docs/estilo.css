@@ -345,29 +345,65 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   z-index: 1;
 }
 
-/* ---------- Sugerencia para girar el teléfono ---------- */
+/* ---------- Aviso para girar el teléfono ---------- */
 
-.girar {
+.aviso-girar {
   display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 18px;
-  margin: 0 auto;
-  width: max-content;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: #f3f5fa;
-  color: var(--tenue);
-  font-size: 13px;
-  transition: opacity .8s ease, transform .8s cubic-bezier(.22, 1, .36, 1);
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  place-items: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, .72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: aparecer .6s ease both;
 }
-.girar svg { width: 18px; height: 18px; }
-.girar.oculto { opacity: 0; transform: translateY(8px); pointer-events: none; }
 @media (max-width: 700px) and (orientation: portrait) {
-  .girar { display: flex; }
+  .aviso-girar { display: grid; }
+}
+.aviso-girar.cerrado { display: none; }
+@keyframes aparecer { from { opacity: 0; } }
+.aviso-tarjeta {
+  width: min(320px, 100%);
+  padding: 30px 24px 22px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 20px 60px -10px rgba(22, 40, 92, .35), 0 0 0 1px var(--linea);
+  text-align: center;
+  animation: subirTarjeta .7s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes subirTarjeta { from { opacity: 0; transform: translateY(18px) scale(.97); } }
+.aviso-telefono svg {
+  width: 74px;
+  height: 74px;
+  color: var(--acento);
+  stroke-width: 3;
+  animation: rotarTelefono 2.6s cubic-bezier(.65, 0, .35, 1) infinite;
+}
+@keyframes rotarTelefono {
+  0%, 18% { transform: rotate(0deg); }
+  45%, 72% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
+}
+.aviso-tarjeta h2 {
+  margin: 14px 0 6px;
+  font-size: 22px;
+  color: var(--tinta);
+}
+.aviso-tarjeta p {
+  margin: 0 0 20px;
+  color: var(--tenue);
+  font-size: 15px;
+}
+.aviso-boton {
+  border: 1px solid var(--linea);
+  background: #f6f7fb;
+  color: var(--tinta);
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* ---------- Carga ---------- */
@@ -393,7 +429,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
 
 /* ---------- Pantallas chicas ---------- */
 
-@media (max-width: 700px) {
+@media (max-width: 700px), (max-height: 500px) {
   :root { --barra-alto: 58px; }
   /* en teléfono las hojas se pasan tocando o deslizando el libro */
   .flecha { display: none; }
@@ -405,6 +441,10 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   .pestanas { display: none; }
   #btnInicio, #btnPantalla { display: none; }
   .avance { gap: 8px; padding: 0 4px; }
+}
+
+@media (max-height: 500px) {
+  :root { --barra-alto: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

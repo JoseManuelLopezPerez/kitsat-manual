@@ -31,3 +31,10 @@ Luego abre http://localhost:8765.
 - `construir.py`: convierte el PDF en imágenes WebP (`docs/paginas/`, `docs/miniaturas/`) y escribe `docs/paginas.json`.
 - `docs/index.html`, `docs/estilo.css`, `docs/flipbook.js`: el visor.
 - `docs/config.json`: título y secciones (número, nombre, color y página donde empieza).
+
+## Caché del navegador
+
+GitHub Pages deja que los navegadores guarden los archivos hasta 10 minutos. Para que los teléfonos vean los cambios al momento:
+
+- Las imágenes de las páginas llevan la versión que escribe `construir.py` en `docs/paginas.json`, así que al cambiar el PDF se recargan solas.
+- Si cambias `estilo.css` o `flipbook.js`, cambia también el número `?v=...` donde se cargan en `docs/index.html`.
