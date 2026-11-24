@@ -437,6 +437,21 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   :root { --barra-alto: 58px; }
   /* en teléfono las hojas se pasan tocando o deslizando el libro */
   .flecha { display: none; }
+  #btnSonido { display: none; }
+  .barra { gap: 0; }
+  .icono { width: 38px; }
+  .contador { flex: none; min-width: 0; font-size: 12px; }
+  input[type="range"] { min-width: 40px; }
+  .pestanas { display: none; }
+  #btnInicio, #btnPantalla { display: none; }
+  .avance { gap: 8px; padding: 0 4px; }
+}
+
+@media (max-height: 500px) {
+  :root { --barra-alto: 48px; }
+}
+
+@media (max-width: 700px), (max-height: 500px), (pointer: coarse) {
   .icono.paso {
     display: grid;
     width: 44px;
@@ -450,18 +465,6 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border: 0; bo
   .icono.paso:hover { background: var(--acento); color: #fff; }
   .icono.paso:active { transform: scale(.92); }
   .icono.paso:disabled { background: #c9d0e0; box-shadow: none; opacity: 1; }
-  #btnSonido { display: none; }
-  .barra { gap: 0; }
-  .icono { width: 38px; }
-  .contador { flex: none; min-width: 0; font-size: 12px; }
-  input[type="range"] { min-width: 40px; }
-  .pestanas { display: none; }
-  #btnInicio, #btnPantalla { display: none; }
-  .avance { gap: 8px; padding: 0 4px; }
-}
-
-@media (max-height: 500px) {
-  :root { --barra-alto: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
