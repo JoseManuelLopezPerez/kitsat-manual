@@ -24,7 +24,8 @@
   let doble = true;          // dos páginas a la vez o una
   let ancho = 0;             // ancho de una página en px de pantalla
   let giro = null;           // hoja que está girando
-  let pendiente = 0;         // un giro en cola (+1 / -1)
+  let objetivo = 0;          // página a la que hay que llegar al terminar el giro actual
+  let prisa = false;         // hay una orden nueva: el giro actual termina rápido
   let sonido = localStorage.getItem("flip-sonido") === "1";
   // dos páginas a la vez es lo predeterminado, también en teléfono
   let modo = localStorage.getItem("flip-modo") === "sencillo" ? "sencillo" : "doble";
@@ -62,8 +63,9 @@
     const v = vista();
     for (let d = -3; d <= 4; d++) precargar((v.der || v.izq) + d);
   }
+  // espera a que las imágenes estén listas, pero nunca deja al lector esperando mucho
   const listas = (...ns) =>
-    Promise.race([Promise.all(ns.filter(valida).map(precargar)), new Promise((r) => setTimeout(r, 900))]);
+    Promise.race([Promise.all(ns.filter(valida).map(precargar)), new Promise((r) => setTimeout(r, prisa ? 250 : 500))]);
 
   function cara(n, lado, extra = "") {
     const div = document.createElement("div");
@@ -139,22 +141,50 @@
     return listo;
   }
 
-  function irA(n, animado = true) {
+  const mismoPliego = (x, y) => {
+    const a = vista(x);
+    const b = vista(y);
+    return a.izq === b.izq && a.der === b.der;
+  };
+
+  // mientras gira una hoja, la orden nueva se guarda y la hoja actual se apresura
+  function pedir(n) {
+    objetivo = n;
+    prisa = true;
+  }
+
+  // ir a cualquier página: si está lejos se salta directo al pliego anterior
+  // y solo se anima la última hoja, para que se entienda hacia dónde se fue
+  async function irA(n, animado = true) {
     n = limitar(Math.round(n) || 1, 1, total);
-    if (giro) return;
-    const actual = vista();
-    const nueva = vista(n);
-    if (actual.izq === nueva.izq && actual.der === nueva.der) return;
-    const dir = n > pagina ? 1 : -1;
-    // páginas vecinas: se hojea; saltos largos: se cambia directo con un fundido
-    if (animado && destino(dir) && vista(destino(dir)).der === nueva.der && vista(destino(dir)).izq === nueva.izq) {
-      voltear(dir);
+    if (giro) {
+      pedir(n);
       return;
     }
-    pagina = n;
-    mostrar();
-    sonar(0.6);
+    if (asomo) {
+      asomo.terminar(false);
+      asomo = null;
+    }
+    if (mismoPliego(n, pagina)) return;
+    const dir = n > pagina ? 1 : -1;
+    if (!animado) {
+      pagina = n;
+      mostrar();
+      return;
+    }
+    const antes = destino(-dir, n);
+    if (antes && !mismoPliego(antes, pagina)) {
+      giro = { cargando: true, nueva: n };
+      const va = vista(antes);
+      const vn = vista(n);
+      await listas(va.izq, va.der, vn.izq, vn.der);
+      pagina = antes;
+      await mostrar();
+      giro = null;
+    }
+    voltear(dir);
   }
+
 
   /* ---------- Hoja que se dobla como papel ----------
    * Geometría clásica de "page curl": la esquina C de la hoja se lleva al punto P.
@@ -287,6 +317,7 @@
 
     const g = {
       dir,
+      nueva,
       P: P0,
       P0,
       P1,
@@ -349,10 +380,11 @@
         // primero quedan listas las hojas quietas; después se quita la que giró
         mostrar().then(() => setTimeout(() => raiz.remove(), 0));
         giro = null;
-        if (pendiente) {
-          const d = Math.sign(pendiente);
-          pendiente -= d;
-          voltear(d, 520);
+        if (objetivo) {
+          const n = objetivo;
+          objetivo = 0;
+          prisa = false;
+          if (!mismoPliego(n, pagina)) irA(n);
         }
       },
     };
@@ -364,14 +396,23 @@
 
   // mueve la esquina en un arco, como cuando una mano levanta la hoja
   function animar(g, hacia, duracion, completo) {
-    const desde = g.P;
+    let desde = g.P;
     const dist = largo(resta(hacia, desde));
-    const dur = Math.max(140, (duracion * dist) / (2 * ancho));
+    let dur = Math.max(140, (duracion * dist) / (2 * ancho));
     const alto = Math.round(ancho / proporcion);
-    const arco = (hacia[1] > 0 ? -1 : 1) * Math.min(alto * 0.16, dist * 0.18);
-    const inicio = performance.now();
+    let arco = (hacia[1] > 0 ? -1 : 1) * Math.min(alto * 0.16, dist * 0.18);
+    let inicio = performance.now();
+    let apurado = false;
     return new Promise((fin) => {
       const paso = (ahora) => {
+        if (prisa && !apurado) {
+          // llegó otra orden: esta hoja termina de caer en un instante
+          apurado = true;
+          desde = g.P;
+          inicio = ahora;
+          dur = 170;
+          arco = 0;
+        }
         const p = limitar((ahora - inicio) / dur, 0, 1);
         const e = suave(p);
         g.fijar([
@@ -399,8 +440,10 @@
       return;
     }
     if (giro) {
-      // clics rápidos se acumulan (hasta 4 hojas)
-      pendiente = Math.sign(pendiente) === -dir ? dir : limitar(pendiente + dir, -4, 4);
+      // clics rápidos: se cuenta a dónde quiere llegar y solo se anima la última hoja
+      const base = objetivo || giro.nueva || pagina;
+      const sig = destino(dir, base);
+      if (sig) pedir(sig);
       return;
     }
     if (!destino(dir)) {
@@ -408,7 +451,7 @@
       return;
     }
     const b = vista(destino(dir));
-    giro = { cargando: true };
+    giro = { cargando: true, nueva: destino(dir) };
     await listas(b.izq, b.der);
     giro = crearGiro(dir);
     if (!giro) return;
@@ -700,7 +743,7 @@
   deslizador.addEventListener("input", () => {
     contador.textContent = `${deslizador.value} / ${total}`;
   });
-  deslizador.addEventListener("change", () => irA(+deslizador.value, false));
+  deslizador.addEventListener("change", () => irA(+deslizador.value));
 
   addEventListener("keydown", (e) => {
     if (e.target.matches("input")) return;
